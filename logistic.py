@@ -1,4 +1,4 @@
-from csv import reader
+import csv
 from math import exp
 
 class LogisticRegression:
@@ -60,7 +60,7 @@ class LogisticRegression:
     def open_file(self, filename):
         test_set = list()
         with open(filename, 'r') as file:
-            csv_reader = reader(file)
+            csv_reader = csv.reader(file)
             for row in csv_reader:
                 if row: test_set.append(row)
         return test_set
@@ -82,5 +82,5 @@ class LogisticRegression:
         print('(Correct: {0}, Incorrect: {1})'.format(cclass, len(classification)-cclass))
         print('Accuracy: {0}%'.format(accuracy))
 
-lr = LogisticRegression('notas.csv')
+lr = LogisticRegression('datasets/banknoteauth.csv')
 lr.run()
