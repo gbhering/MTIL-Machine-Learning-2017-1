@@ -11,7 +11,7 @@ class LogisticRegression:
     def logistic_regression(self):
         predictions = list()
         self.normalize()
-        b = self.get_coef_vector()
+        b = self.update_coef()
         for row in self.dataset:
             p = self.predict(row, b)
             predictions.append(p)
@@ -33,7 +33,7 @@ class LogisticRegression:
         return self.sigmoid(gamma)
 
     # get the b vector from the tutorial
-    def get_coef_vector(self):
+    def update_coef(self):
         b = [0.0 for i in enumerate(self.dataset[0])]
         for epoch in range(self.epoch):
             for x in self.dataset:
