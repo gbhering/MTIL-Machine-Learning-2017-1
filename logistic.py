@@ -65,12 +65,22 @@ class LogisticRegression:
                 if row: test_set.append(row)
         return test_set
 
+    def accuracy(self, actual, predicted):
+        correct = 0
+        for i, act in enumerate(actual):
+            if act == predicted[i]: correct += 1
+        return correct, correct/float(len(actual))*100.0
+
     def run(self):
         for i, el in enumerate(self.dataset[0]):
             for row in self.dataset:
                 row[i] = float(row[i].strip())
         predictions, classification = self.logistic_regression()
-        print('Classes: {0}'.format(classification))
+        actual = [row[-1] for row in self.dataset]
+        cclass, accuracy = self.accuracy(actual, classification)
+        print('Classification: {0}'.format(classification))
+        print('(Correct: {0}, Incorrect: {1})'.format(cclass, len(classification)-cclass))
+        print('Accuracy: {0}%'.format(accuracy))
 
 lr = LogisticRegression('notas.csv')
 lr.run()
