@@ -79,6 +79,9 @@ int main() {
         }
     }
 
+    vector<int> correctYes(2, 0);
+    vector<int> correctNo(2, 0);
+
     testcases.open("datasets/occupancy_test.csv");
     while (getline(testcases, line)) {
         double value;
@@ -95,11 +98,13 @@ int main() {
         for (unsigned int i = 0; i < database.size(); i++) {
             for (unsigned int j = 0; j < database[i].size() - 1; j++) {
                 distances[i] += pow(dLine[j] - database[i][j], 2);
+                //cout << dLine[j] << " " << database[i][j] << endl;
             }
             distances[i] = sqrt(distances[i]);
+            //cout << "Distance to example " << i+1 << " is " << distances[i] << "." << endl;
         }
 
-        int K = 5;
+        int K = 3;
         vector<int> count(2, 0);
         for (int i = 0; i < K; i++) {
             int neighbor = -1;
@@ -117,13 +122,36 @@ int main() {
         }
 
         if (count[0] > count[1]) {
-            cout << "Predicted: " << 0 << " | Real: " << dLine[dLine.size()-1] << endl;
+            if (dLine[dLine.size()-1] == 0) {
+                correctNo[1]++;
+            }
+            else {
+                correctNo[0]++;
+            }
         }
         else {
-            cout << "Predicted: " << 1 << " | Real: " << dLine[dLine.size()-1] << endl;
+            if (dLine[dLine.size()-1] == 1) {
+                correctYes[1]++;
+            }
+            else {
+                correctYes[0]++;
+            }
         }
     }
     testcases.close();
+
+    cout << "Number of No examples in test: " << correctNo[1] + correctYes[0] << "." << endl;
+    cout << "Number of Yes examples in test: " << correctNo[0] + correctYes[1] << "." << endl;
+    cout << "----------------" << endl;
+    cout << "Number of examples classified as No: " << correctNo[0] + correctNo[1] << "." << endl;
+    cout << "Number of examples correctly classified as No: " << correctNo[1] << "." << endl;
+    cout << "----------------" << endl;
+    cout << "Number of examples classified as Yes: " << correctYes[0] + correctYes[1] << "." << endl;
+    cout << "Number of examples correctly classified as Yes: " << correctYes[1] << "." << endl;
+    cout << "----------------" << endl;
+    cout << "Total Precision: " << 100.0 * (correctNo[1] + correctYes[1]) / (correctNo[1] + correctYes[0] + correctNo[0] + correctYes[1]) << " percent" << endl;
+    cout << "Yes Precision: " << 100.0 * (correctYes[1]) / (correctYes[0] + correctYes[1]) << " percent" << endl;
+    cout << "No Precision: " << 100.0 * (correctNo[1]) / (correctNo[1] + correctNo[0]) << " percent" << endl;
 
     return 0;
 }
