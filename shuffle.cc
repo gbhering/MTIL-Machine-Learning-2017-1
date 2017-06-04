@@ -25,14 +25,24 @@ double getNumberFromString(string& s) {
     return number;
 }
 
-int main() {
+int main(int argc, char **argv) {
     string line;
     ifstream dataset;
     ofstream training, test;
     vector<vector<float>> database;
 
+    // Expects dataset name as parameter
+    if(argc <= 1){
+        cout << "Error: missing dataset name. Correct usage: "
+             << endl << argv[0] << " dataset_name"
+             << endl << "Terminating..." << endl;
+        return 0;
+    }
+
+    string dataset_name = argv[1];
+
     //READING INPUT FILE
-    dataset.open("datasets/occupancy.csv");
+    dataset.open("datasets/" + dataset_name + ".csv");
     while (getline(dataset, line)) {
         double value;
         vector<float> dLine;
@@ -55,7 +65,7 @@ int main() {
     int testSize = database.size() * proportion;
     int trainingSize = database.size() - testSize;
 
-    training.open("datasets/training.csv");
+    training.open("datasets/" + dataset_name + "_training.csv");
     for (int i = 0; i < trainingSize; i++) {
         for (unsigned int j = 0; j < database[i].size(); j++) {
             training << database[i][j];
@@ -67,7 +77,7 @@ int main() {
     }
     training.close();
 
-    test.open("datasets/test.csv");
+    test.open("datasets/" + dataset_name + "_test.csv");
     for (unsigned int i = trainingSize; i < database.size(); i++) {
         for (unsigned int j = 0; j < database[i].size(); j++) {
             test << database[i][j];
