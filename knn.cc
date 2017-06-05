@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 #include <cmath>
 
 using namespace std;
@@ -46,14 +47,35 @@ void normalizeTestCase(vector<double>& attribute, vector<pair<double,double>> mi
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
     string line;
     ifstream dataset, testcases;
     vector<vector<double>> database;
     vector<pair<double,double>> minMax;
 
+    // Expects dataset name as argument
+    // Optional k as argument
+    if(argc <= 1){
+        cout << "Error: missing dataset name. Correct usage: "
+             << endl << argv[0] << " dataset_name [k]"
+             << endl << "Terminating..." << endl;
+        return 0;
+    }
+    
+    // Default value for K
+    int K = 3;
+
+    // K specified
+    if(argc == 3){
+        stringstream ss;
+        ss << argv[2];
+        ss >> K;
+    }
+
+    string dataset_name = argv[1];
+
     //READING INPUT FILE
-    dataset.open("datasets/occupancy_training.csv");
+    dataset.open("datasets/" + dataset_name + "_training.csv");
     while (getline(dataset, line)) {
         double value;
         vector<double> dLine;
@@ -82,7 +104,7 @@ int main() {
     vector<int> correctYes(2, 0);
     vector<int> correctNo(2, 0);
 
-    testcases.open("datasets/occupancy_test.csv");
+    testcases.open("datasets/" + dataset_name + "_test.csv");
     while (getline(testcases, line)) {
         double value;
         vector<double> dLine;
@@ -104,7 +126,6 @@ int main() {
             //cout << "Distance to example " << i+1 << " is " << distances[i] << "." << endl;
         }
 
-        int K = 3;
         vector<int> count(2, 0);
         for (int i = 0; i < K; i++) {
             int neighbor = -1;
@@ -140,6 +161,9 @@ int main() {
     }
     testcases.close();
 
+    cout << "Dataset: " << dataset_name << endl;
+    cout << "K: " << K << endl;
+    cout << "----------------" << endl;
     cout << "Number of No examples in test: " << correctNo[1] + correctYes[0] << "." << endl;
     cout << "Number of Yes examples in test: " << correctNo[0] + correctYes[1] << "." << endl;
     cout << "----------------" << endl;
