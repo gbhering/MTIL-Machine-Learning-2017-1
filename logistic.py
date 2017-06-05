@@ -39,11 +39,11 @@ class Statistics:
         return 100*(self.number_of_correct_yes+self.number_of_correct_no)/(self.number_of_yes+self.number_of_no)
 
     def get_no_precision(self):
-        if self.number_classified_no == 0: return 0
+        if self.number_classified_no == 0: return 0.0
         return 100*self.number_of_correct_no/(self.number_classified_no)
 
     def get_yes_precision(self):
-        if self.number_classified_yes == 0: return 0
+        if self.number_classified_yes == 0: return 0.0
         return 100*self.number_of_correct_yes/(self.number_classified_yes)
 
     def print_statistics(self):
@@ -142,5 +142,5 @@ class LogisticRegression:
         stats.print_statistics()
 
 
-lr = LogisticRegression('occupancy','datasets/occupancy_training.csv','datasets/occupancy_test.csv')
+lr = LogisticRegression('Wilt','datasets/wilt_training.csv','datasets/wilt_test.csv')
 lr.run()
