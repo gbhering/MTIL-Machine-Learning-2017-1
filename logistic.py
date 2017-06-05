@@ -1,22 +1,83 @@
 import csv
 from math import exp
 
+class Statistics:
+    def __init__(self, ytest, yguess):
+        self.ytest = ytest
+        self.yguess = yguess
+        self.number_of_correct_no, self.number_of_correct_yes = self.get_correct_classification()
+        self.number_classified_no, self.number_classified_yes = self.get_classification()
+        self.number_of_no = self.get_number_of_no()
+        self.number_of_yes = self.get_number_of_yes()
+
+    def get_correct_classification(self):
+        correct = [0, 0]
+        for i, yhat in enumerate(self.ytest):
+            if yhat == self.yguess[i]: 
+                if yhat == 0:
+                    correct[0] += 1
+                else:
+                    correct[1] += 1
+        number_of_correct_no = correct[0]
+        number_of_correct_yes = correct[1]
+        return number_of_correct_no, number_of_correct_yes
+
+    def get_classification(self):
+        number_classified_no = self.yguess.count(0)
+        number_classified_yes = self.yguess.count(1)
+        return number_classified_no, number_classified_yes
+
+    def get_number_of_yes(self):
+        number_of_yes = self.ytest.count(1)
+        return number_of_yes
+
+    def get_number_of_no(self):
+        number_of_no = self.ytest.count(0)
+        return number_of_no
+
+    def get_precision(self):
+        return 100*(self.number_of_correct_yes+self.number_of_correct_no)/(self.number_of_yes+self.number_of_no)
+
+    def get_no_precision(self):
+        if self.number_classified_no == 0: return 0
+        return 100*self.number_of_correct_no/(self.number_classified_no)
+
+    def get_yes_precision(self):
+        if self.number_classified_yes == 0: return 0
+        return 100*self.number_of_correct_yes/(self.number_classified_yes)
+
+    def print_statistics(self):
+        print('Number of No examples in test: {0}'.format(self.number_of_no))
+        print('Number of Yes examples in test: {0}'.format(self.number_of_yes))
+        print('----------------')
+        print('Number of examples classified as No: {0}'.format(self.number_classified_no))
+        print('Number of examples correctly classified as No: {0}'.format(self.number_of_correct_no))
+        print('----------------')
+        print('Number of examples classified as Yes: {0}'.format(self.number_classified_yes))
+        print('Number of examples correctly classified as Yes: {0}'.format(self.number_of_correct_yes))
+        print('----------------')
+        print('Total Precision: {0:.4f} percent'.format(self.get_precision()))
+        print('Yes Precision: {0:.4f} percent'.format(self.get_yes_precision()))
+        print('No Precision: {0:.4} percent'.format(self.get_no_precision()))
+
 class LogisticRegression:
-    def __init__(self, filename, learning_rate=0.1, number_epoch=50):
-        self.dataset = self.open_file(filename)
+    def __init__(self, dataset, train, test, learning_rate=0.1, number_epoch=100):
+        self.dataset = dataset
+        self.train = self.open_file(train)
+        self.test = self.open_file(test)
         self.epoch = number_epoch
         self.learning_rate = learning_rate
 
     # actually does the regression which is a classification
     def logistic_regression(self):
         predictions = list()
-        self.normalize()
+        self.normalize(self.test)
         b = self.optimal_b_coef()
-        for row in self.dataset:
+        for row in self.test:
             p = self.predict(row, b)
             predictions.append(p)
         classifications = [round(p) for p in predictions]
-        return predictions, classifications
+        return b, predictions, classifications
 
     # sigmoid function to avoid math error on 1/(1 + exp(-gamma))
     def sigmoid(self, gamma):
@@ -33,9 +94,10 @@ class LogisticRegression:
         return self.sigmoid(gamma)
 
     def optimal_b_coef(self):
-        b = [0.0 for i in enumerate(self.dataset[0])]
+        self.normalize(self.train)
+        b = [0.0 for i in enumerate(self.train[0])]
         for epoch in range(self.epoch):
-            for x in self.dataset:
+            for x in self.train:
                 dy = self.predict(x, b)
                 b[0] = b[0] + self.learning_rate*(x[-1]-dy)*dy*(1.0 - dy)
                 for i in range(len(x)-1):
@@ -43,13 +105,13 @@ class LogisticRegression:
         return b
 
     # normalizes test set on csv to be between 0 and 1
-    def normalize(self):
+    def normalize(self, dataset):
         extremes = list()
-        for i in range(len(self.dataset[0])):
-            cols = [row[i] for row in self.dataset]
+        for i in range(len(dataset[0])):
+            cols = [row[i] for row in dataset]
             extremes.append([min(cols), max(cols)])
 
-        for row in self.dataset:
+        for row in dataset:
             for i in range(len(row)):
                 minv = extremes[i][0]
                 maxv = extremes[i][1]
@@ -64,22 +126,21 @@ class LogisticRegression:
                 if row: test_set.append(row)
         return test_set
 
-    def accuracy(self, actual, predicted):
-        correct = 0
-        for i, act in enumerate(actual):
-            if act == predicted[i]: correct += 1
-        return correct, correct/float(len(actual))*100.0
-
     def run(self):
-        for i, el in enumerate(self.dataset[0]):
-            for row in self.dataset:
+        for i, el in enumerate(self.train[0]):
+            for row in self.train:
                 row[i] = float(row[i].strip())
-        predictions, classification = self.logistic_regression()
-        actual = [row[-1] for row in self.dataset]
-        cclass, accuracy = self.accuracy(actual, classification)
-        print('Classification: {0}'.format(classification))
-        print('(Correct: {0}, Incorrect: {1})'.format(cclass, len(classification)-cclass))
-        print('Accuracy: {0}%'.format(accuracy))
+        for i, el in enumerate(self.test[0]):
+            for row in self.test:
+                row[i] = float(row[i].strip())
+        b, predictions, yguess = self.logistic_regression()
+        ytest  = [row[-1] for row in self.test]
+        stats = Statistics(ytest, yguess)
+        print('Dataset: {0}'.format(self.dataset))
+        print('Optimal b vector: {0}'.format(b))
+        print('----------------')
+        stats.print_statistics()
 
-lr = LogisticRegression('datasets/banknoteauth.csv')
+
+lr = LogisticRegression('occupancy','datasets/occupancy_training.csv','datasets/occupancy_test.csv')
 lr.run()
