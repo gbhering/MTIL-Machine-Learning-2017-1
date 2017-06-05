@@ -1,6 +1,65 @@
 import csv
 from math import exp
 
+class Statistics:
+    def __init__(self, ytest, yguess):
+        self.ytest = ytest
+        self.yguess = yguess
+        self.number_of_correct_no, self.number_of_correct_yes = self.get_correct_classification()
+        self.number_classified_no, self.number_classified_yes = self.get_classification()
+        self.number_of_no = self.get_number_of_no()
+        self.number_of_yes = self.get_number_of_yes()
+
+    def get_correct_classification(self):
+        correct = [0, 0]
+        for i, yhat in enumerate(self.ytest):
+            if yhat == self.yguess[i]: 
+                if yhat == 0:
+                    correct[0] += 1
+                else:
+                    correct[1] += 1
+        number_of_correct_no = correct[0]
+        number_of_correct_yes = correct[1]
+        return number_of_correct_no, number_of_correct_yes
+
+    def get_classification(self):
+        number_classified_no = self.yguess.count(0)
+        number_classified_yes = self.yguess.count(1)
+        return number_classified_no, number_classified_yes
+
+    def get_number_of_yes(self):
+        number_of_yes = self.ytest.count(1)
+        return number_of_yes
+
+    def get_number_of_no(self):
+        number_of_no = self.ytest.count(0)
+        return number_of_no
+
+    def get_precision(self):
+        return 100*(self.number_of_correct_yes+self.number_of_correct_no)/(self.number_of_yes+self.number_of_no)
+
+    def get_no_precision(self):
+        if self.number_classified_no == 0: return 0
+        return 100*self.number_of_correct_no/(self.number_classified_no)
+
+    def get_yes_precision(self):
+        if self.number_classified_yes == 0: return 0
+        return 100*self.number_of_correct_yes/(self.number_classified_yes)
+
+    def print_statistics(self):
+        print('Number of No examples in test: {0}'.format(self.number_of_no))
+        print('Number of Yes examples in test: {0}'.format(self.number_of_yes))
+        print('----------------')
+        print('Number of examples classified as No: {0}'.format(self.number_classified_no))
+        print('Number of examples correctly classified as No: {0}'.format(self.number_of_correct_no))
+        print('----------------')
+        print('Number of examples classified as Yes: {0}'.format(self.number_classified_yes))
+        print('Number of examples correctly classified as Yes: {0}'.format(self.number_of_correct_yes))
+        print('----------------')
+        print('Total Precision: {0:.4f} percent'.format(self.get_precision()))
+        print('Yes Precision: {0:.4f} percent'.format(self.get_yes_precision()))
+        print('No Precision: {0:.4} percent'.format(self.get_no_precision()))
+
 class LogisticRegression:
     def __init__(self, dataset, train, test, learning_rate=0.1, number_epoch=100):
         self.dataset = dataset
@@ -67,12 +126,6 @@ class LogisticRegression:
                 if row: test_set.append(row)
         return test_set
 
-    def accuracy(self, actual, predicted):
-        correct = 0
-        for i, act in enumerate(actual):
-            if act == predicted[i]: correct += 1
-        return correct, correct/float(len(actual))*100.0
-
     def run(self):
         for i, el in enumerate(self.train[0]):
             for row in self.train:
@@ -81,30 +134,12 @@ class LogisticRegression:
             for row in self.test:
                 row[i] = float(row[i].strip())
         b, predictions, yguess = self.logistic_regression()
-        ytrain = [row[-1] for row in self.train]
         ytest  = [row[-1] for row in self.test]
-        correct = [0, 0]
-        for i, yhat in enumerate(ytest):
-            if yhat == yguess[i]: 
-                if yhat == 0:
-                    correct[0] += 1
-                else:
-                    correct[1] += 1
+        stats = Statistics(ytest, yguess)
         print('Dataset: {0}'.format(self.dataset))
         print('Optimal b vector: {0}'.format(b))
         print('----------------')
-        print('Number of No examples in test: {0}'.format(ytest.count(0)))
-        print('Number of Yes examples in test: {0}'.format(ytest.count(1)))
-        print('----------------')
-        print('Number of examples classified as No: {0}'.format(yguess.count(0)))
-        print('Number of examples correctly classified as No: {0}'.format(correct[0]))
-        print('----------------')
-        print('Number of examples classified as Yes: {0}'.format(yguess.count(1)))
-        print('Number of examples correctly classified as Yes: {0}'.format(correct[1]))
-        print('----------------')
-        print('Total Precision: {0:.4f} percent'.format(100*(correct[1]+correct[0]) / (ytest.count(0)+ytest.count(1))))
-        print('Yes Precision: {0:.4f} percent'.format(100*correct[1]/yguess.count(1)))
-        print('No Precision: {0:.4} percent'.format(100*correct[0]/yguess.count(0)))
+        stats.print_statistics()
 
 
 lr = LogisticRegression('occupancy','datasets/occupancy_training.csv','datasets/occupancy_test.csv')
