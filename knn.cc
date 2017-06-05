@@ -54,10 +54,10 @@ int main(int argc, char **argv) {
     vector<pair<double,double>> minMax;
 
     // Expects dataset name as argument
-    // Optional k as argument
+    // Optional odd k as argument
     if(argc <= 1){
         cout << "Error: missing dataset name. Correct usage: "
-             << endl << argv[0] << " dataset_name [k]"
+             << endl << argv[0] << " dataset_name [k (odd)]"
              << endl << "Terminating..." << endl;
         return 0;
     }
@@ -70,6 +70,10 @@ int main(int argc, char **argv) {
         stringstream ss;
         ss << argv[2];
         ss >> K;
+        // Trick to enforce K odd and guarantee there will be no draws
+        if(K%2 == 0){
+            K++;
+        }
     }
 
     string dataset_name = argv[1];
