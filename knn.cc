@@ -124,17 +124,17 @@ int main(int argc, char **argv) {
         for (unsigned int i = 0; i < database.size(); i++) {
             for (unsigned int j = 0; j < database[i].size() - 1; j++) {
                 distances[i] += pow(dLine[j] - database[i][j], 2);
-                //cout << dLine[j] << " " << database[i][j] << endl;
             }
             distances[i] = sqrt(distances[i]);
-            //cout << "Distance to example " << i+1 << " is " << distances[i] << "." << endl;
         }
 
         vector<int> count(2, 0);
+        // K times
         for (int i = 0; i < K; i++) {
             int neighbor = -1;
             double lowest = 100000.0;
 
+            // Find the neirest neighbor
             for (unsigned int j = 0; j < distances.size(); j++) {
                 if (distances[j] < lowest) {
                     lowest = distances[j];
@@ -142,7 +142,10 @@ int main(int argc, char **argv) {
                 }
             }
 
+            // Increase the number of votes (count) for this class
             count[database[neighbor][database[neighbor].size()-1]]++;
+            // Force this neighbor to be far away
+            // so it won't be selected on the next iteration
             distances[neighbor] = 1000000;
         }
 
