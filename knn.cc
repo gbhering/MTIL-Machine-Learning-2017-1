@@ -168,14 +168,10 @@ int main(int argc, char **argv) {
     // Flag to get statistics only, without labels
     // Useful to easily past results from a file to a sheet
     #ifdef STATS_FLAG
-    cout << correctYes[0] + correctYes[1] << "\t"
-         << correctNo[0] + correctYes[1] << endl
-         << correctNo[0] + correctNo[1] << "\t"
-         << correctNo[1] + correctYes[0] << endl
-         << correctYes[1] << "\t"
-         << correctNo[0] + correctYes[1] << endl
-         << correctNo[1] << "\t"
-         << correctNo[1] + correctYes[0] << endl;
+    cout << correctYes[0] + correctYes[1] << endl
+         << correctNo[0] + correctNo[1] << endl
+         << correctYes[1] << endl
+         << correctNo[1] << endl;
     #else
     cout << "Dataset: " << dataset_name << endl;
     cout << "K: " << K << endl;
